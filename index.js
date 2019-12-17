@@ -66,9 +66,9 @@ function timeZone1(response3Json){
   });
 }
 
-//runs and returns array from fetch on 74, but stops on 81 with "response3Json is undefined" - 
+//runs and returns array from fetch on 74, but stops on 83 with "response3Json is undefined" - 
 //why? 
-//no trouble on lines 130 or 161
+//no trouble on lines 130 or 161. so the next function timeZone1() can't read response3Json
 function geoCoding(response1Json){
   let countryCapital=response1Json[0].capital;
   let countryCode=response1Json[0].alpha2Code;
