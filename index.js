@@ -6,6 +6,11 @@
 //   return queryItems.join('&');
 // }
 
+let countryCapital = "replace";
+let response3Json = "replace";
+let response2Json = "replace";
+let response1Json = "replace"; 
+
 function displayTimeResults(response5Json, response2Json, countryCapital){
   console.log(response5Json);
   console.log(response2Json);
@@ -23,7 +28,7 @@ $('#timeresults').removeClass('hidden');
 
 }
 
-function timeZone2(response4Json, response2Json, countryCapital){
+function timeZone2(response4Json){
   console.log(response4Json);
   let timeZone = response4Json.timeZoneId;
   console.log(timeZone);
@@ -41,7 +46,7 @@ function timeZone2(response4Json, response2Json, countryCapital){
 
 }
 
-function timeZone1(response3Json, response2Json, countryCapital){
+function timeZone1(response3Json){
   console.log(response3Json);
   let lat=response3Json[0].results.geometry.location.lat;
   let long=response3Json[0].results.geometry.location.long;
@@ -55,13 +60,16 @@ function timeZone1(response3Json, response2Json, countryCapital){
     }
     throw new Error(res4.statusText);
   })
-  .then(response4Json => timeZone2(response4Json, response2Json, countryCapital))
+  .then(response4Json => timeZone2(response4Json))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
 }
 
-function geoCoding(response1Json, response2Json){
+//runs and returns array from fetch on 74, but stops on 81 with "response3Json is undefined" - 
+//why? 
+//no trouble on lines 130 or 161
+function geoCoding(response1Json){
   let countryCapital=response1Json[0].capital;
   let countryCode=response1Json[0].alpha2Code;
 
@@ -72,12 +80,13 @@ function geoCoding(response1Json, response2Json){
    }
    throw new Error(res3.statusText);
  })
- .then(response3Json => timeZone1(response3Json, response2Json, countryCapital))
+ .then(response3Json => timeZone1(response3Json))
  .catch(err => {
    $('#js-error-message').text(`Something went wrong: ${err.message}`);
  });
 }
-  
+ 
+//runs third, works
 function displayTranslationResults(response2Json)
 { console.log(response2Json);
   
@@ -90,6 +99,7 @@ $('#results').append(
 $('#results').removeClass('hidden');
 }
 
+//runs second, triggers displayTranslationResults() and geoCoding() (also takes response1Json as parameter)
 function googleTranslate(response1Json) {
    console.log(response1Json);
 
@@ -121,12 +131,12 @@ function googleTranslate(response1Json) {
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
-  
+  geoCoding(response1Json);
 }
 
 debugger
 
-
+//runs first, sends data to googleTranslate
 function getResults(country) {
 
 const url = "https://restcountries-v1.p.rapidapi.com/name/"+country;
@@ -149,7 +159,6 @@ debugger
       throw new Error(res1.statusText);
     })
     .then(response1Json => googleTranslate(response1Json))
-    .then(response1Json => res1 = response1Json)
     .catch(err => {
       $('#js-error-message').text(`Something went wrong: ${err.message}`);
     });
@@ -164,8 +173,6 @@ function watchForm(){
     event.preventDefault();
     const country = $('#js-country').val();
     getResults(country);
-    const res1;
-    geoCoding(res1);
   });
 }
 
