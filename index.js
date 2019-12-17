@@ -23,7 +23,7 @@ $('#timeresults').removeClass('hidden');
 
 }
 
-function timeZone2(response4Json){
+function timeZone2(response4Json, response2Json, countryCapital){
   console.log(response4Json);
   let timeZone = response4Json.timeZoneId;
   console.log(timeZone);
@@ -34,14 +34,14 @@ function timeZone2(response4Json){
     }
     throw new Error(res5.statusText);
   })
-  .then(response5Json => displayTimeResults(response5Json))
+  .then(response5Json => displayTimeResults(response5Json, response2Json, countryCapital))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
 
 }
 
-function timeZone1(response3Json){
+function timeZone1(response3Json, response2Json, countryCapital){
   console.log(response3Json);
   let lat=response3Json[0].results.geometry.location.lat;
   let long=response3Json[0].results.geometry.location.long;
@@ -55,13 +55,13 @@ function timeZone1(response3Json){
     }
     throw new Error(res4.statusText);
   })
-  .then(response4Json => timeZone2(response4Json))
+  .then(response4Json => timeZone2(response4Json, response2Json, countryCapital))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
 }
 
-function geoCoding(response1Json){
+function geoCoding(response1Json, response2Json){
   let countryCapital=response1Json[0].capital;
   let countryCode=response1Json[0].alpha2Code;
 
@@ -72,7 +72,7 @@ function geoCoding(response1Json){
    }
    throw new Error(res3.statusText);
  })
- .then(response3Json => timeZone1(response3Json))
+ .then(response3Json => timeZone1(response3Json, response2Json, countryCapital))
  .catch(err => {
    $('#js-error-message').text(`Something went wrong: ${err.message}`);
  });
@@ -121,6 +121,7 @@ function googleTranslate(response1Json) {
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
+  
 }
 
 debugger
@@ -147,10 +148,12 @@ debugger
       throw new Error(res1.statusText);
     })
     .then(response1Json => googleTranslate(response1Json))
-    .then(response1Json => geoCoding(response1Json))
+    .then(countryCapital => response1Json[0].capital = countryCapital)
     .catch(err => {
       $('#js-error-message').text(`Something went wrong: ${err.message}`);
     });
+geoCoding(response1Json, countryCapital);
+
 }
 
 debugger
