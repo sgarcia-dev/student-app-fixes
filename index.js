@@ -126,6 +126,7 @@ function googleTranslate(response1Json) {
 
 debugger
 
+
 function getResults(country) {
 
 const url = "https://restcountries-v1.p.rapidapi.com/name/"+country;
