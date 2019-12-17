@@ -149,11 +149,11 @@ debugger
       throw new Error(res1.statusText);
     })
     .then(response1Json => googleTranslate(response1Json))
-    .then(countryCapital => response1Json[0].capital = countryCapital)
+    .then(response1Json => res1 = response1Json)
     .catch(err => {
       $('#js-error-message').text(`Something went wrong: ${err.message}`);
     });
-geoCoding(response1Json, countryCapital);
+
 
 }
 
@@ -164,6 +164,8 @@ function watchForm(){
     event.preventDefault();
     const country = $('#js-country').val();
     getResults(country);
+    const res1;
+    geoCoding(res1);
   });
 }
 
