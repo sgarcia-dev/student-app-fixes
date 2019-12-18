@@ -11,7 +11,7 @@ let response1Json = "replace";
 function displayTimeResults(response5Json, response2Json, countryCapital){
   console.log(response5Json);
   console.log(response2Json);
-  console.log(countryCapital);
+  console.log(response1Json);
   let actualTime = response5Json.datetime;
   let actualTimeString = actualTime.toString();
   let actualTimeShort = actualTimeString.substring(11,16);
@@ -39,7 +39,6 @@ function timeZone2(response4Json){
     throw new Error(res5.statusText);
   })
   .then(response5Json => {console.log(response5Json)})
-  .then(displayTimeResults(response5Json, response2Json, countryCapital))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
@@ -62,7 +61,7 @@ function timeZone1(response3Json){
     }
     throw new Error(res4.statusText);
   })
-  .then(response4Json => timeZone2(response4Json))
+  .then(response4Json => console.log(response4Json))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
@@ -83,9 +82,11 @@ function geoCoding(response1Json){
  .then(response3Json => {
   console.log(response3Json)  
   timeZone1(response3Json)})
+ .then(response4Json => timeZone2(response4Json))
+ .then(response5Json => displayTimeZone(response5Json, response2Json, countryCapital)) 
  .catch(err => {
    $('#js-error-message').text(`Something went wrong: ${err.message}`);
- });
+ })
 }
  
 //runs third, works
@@ -130,12 +131,10 @@ function googleTranslate(response1Json) {
     throw new Error(res2.statusText);
   })
   .then(response2Json => displayTranslationResults(response2Json))
+  .then(geoCoding(response1Json))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
-  response2Json = response2Json;
-  console.log(response2Json);
-  geoCoding(response1Json);
 }
 
 debugger
@@ -163,11 +162,10 @@ debugger
       throw new Error(res1.statusText);
     })
     .then(response1Json => googleTranslate(response1Json))
+    .then(response2Json => displayTranslationResults(response2Json))
     .catch(err => {
       $('#js-error-message').text(`Something went wrong: ${err.message}`);
     });
-
-
 }
 
 debugger
