@@ -1,22 +1,20 @@
 'use strict';
 
-// function formatQueryParams(params) {
-//   const queryItems = Object.keys(params)
-//     .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
-//   return queryItems.join('&');
-// }
-
 let countryCapital = "replace";
+let response5Json = "replace";
+let response4Json = "replace";
 let response3Json = "replace";
 let response2Json = "replace";
 let response1Json = "replace"; 
 
+//runs 7th
 function displayTimeResults(response5Json, response2Json, countryCapital){
   console.log(response5Json);
   console.log(response2Json);
   console.log(countryCapital);
   let actualTime = response5Json.datetime;
-  let actualTimeShort = actualTime.substring(11,15);
+  let actualTimeString = actualTime.toString();
+  let actualTimeShort = actualTimeString.substring(11,16);
   console.log(actualTimeShort);
 $('#timeresults').empty();
 $('#timeresults').append(
@@ -28,6 +26,7 @@ $('#timeresults').removeClass('hidden');
 
 }
 
+//runs 6th
 function timeZone2(response4Json){
   console.log(response4Json);
   let timeZone = response4Json.timeZoneId;
@@ -39,19 +38,22 @@ function timeZone2(response4Json){
     }
     throw new Error(res5.statusText);
   })
-  .then(response5Json => displayTimeResults(response5Json, response2Json, countryCapital))
+  .then(response5Json => {console.log(response5Json)})
+  .then(displayTimeResults(response5Json, response2Json, countryCapital))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
-
+  console.log(response5Json);
 }
 
+//runs 5th
 function timeZone1(response3Json){
   console.log(response3Json);
-  let lat=response3Json[0].results.geometry.location.lat;
-  let long=response3Json[0].results.geometry.location.long;
-  let timeStamp= Date.now();
-  let timeStampShort= timeStamp.substring(0, timeStamp.length-3)
+  let lat=response3Json.results[0].geometry.location.lat;
+  let long=response3Json.results[0].geometry.location.lng;
+  const timeStamp = Date.now();
+  const timeStampString = timeStamp.toString();
+  let timeStampShort= timeStampString.substring(0, (timeStampString.length)-3);
   console.log(timeStampShort);
   fetch("https://maps.googleapis.com/maps/api/timezone/json?location="+lat+","+long+"&timestamp="+timeStampShort+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
   .then(res4 => {
@@ -66,9 +68,7 @@ function timeZone1(response3Json){
   });
 }
 
-//runs and returns array from fetch on 74, but stops on 83 with "response3Json is undefined" - 
-//why? 
-//no trouble on lines 130 or 161. so the next function timeZone1() can't read response3Json
+//runs fourth
 function geoCoding(response1Json){
   let countryCapital=response1Json[0].capital;
   let countryCode=response1Json[0].alpha2Code;
@@ -80,7 +80,9 @@ function geoCoding(response1Json){
    }
    throw new Error(res3.statusText);
  })
- .then(response3Json => timeZone1(response3Json))
+ .then(response3Json => {
+  console.log(response3Json)  
+  timeZone1(response3Json)})
  .catch(err => {
    $('#js-error-message').text(`Something went wrong: ${err.message}`);
  });
@@ -131,6 +133,8 @@ function googleTranslate(response1Json) {
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
+  response2Json = response2Json;
+  console.log(response2Json);
   geoCoding(response1Json);
 }
 
