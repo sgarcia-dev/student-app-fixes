@@ -11,7 +11,7 @@ function watchForm(){
 $(watchForm);
 
 //runs 7th
-displayTimeResults() = ((response5Json,countryCapital,response2Json) => {
+var displayTimeResults = ((response5Json,countryCapital,response2Json) => {
   console.log(response5Json);
   console.log(countryCapital);
   console.log(response2Json);
@@ -30,25 +30,15 @@ $('#timeresults').removeClass('hidden');
 })
 
 //runs 6th
-timeZone2() = (response4Json => {
+var timeZone2 = (response4Json => {
   console.log(response4Json);
   let timeZone = response4Json.timeZoneId;
   console.log(timeZone);
-  fetch("https://worldtimeapi.org/api/timezone/"+timeZone)
-  .then(res5 => {
-    if (res5.ok) {
-      return res5.json();
-    }
-    throw new Error(res5.statusText);
-  })
-  .then(response5Json => console.log(response5Json))//, response2Json, countryCapital)})
-  .catch(err => {
-    $('#js-error-message').text(`Something went wrong: ${err.message}`);
-  })
+  request("https://worldtimeapi.org/api/timezone/"+timeZone)
 })
 
 //runs 5th
-timeZone1() = (response3Json => {
+var timeZone1 = (response3Json => {
   console.log(response3Json);
   let lat=response3Json.results[0].geometry.location.lat;
   let long=response3Json.results[0].geometry.location.lng;
@@ -56,17 +46,17 @@ timeZone1() = (response3Json => {
   const timeStampString = timeStamp.toString();
   let timeStampShort= timeStampString.substring(0, (timeStampString.length)-3);
   request("https://maps.googleapis.com/maps/api/timezone/json?location="+lat+","+long+"&timestamp="+timeStampShort+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
-  }
-)
+  })
+
 
 
 //runs fourth
-function geoCoding(translateData){
+var geoCoding = (translateData =>{
   let countryCapital=translateData[0].capital;
   let countryCode=translateData[0].alpha2Code;
 
   request("https://maps.googleapis.com/maps/api/geocode/json?address="+countryCapital+"&components=country:"+countryCode+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
-}
+})
 
 //runs third, works
 function displayTranslationResults(response2Json)
