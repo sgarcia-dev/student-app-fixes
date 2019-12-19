@@ -8,27 +8,29 @@ let response2Json = "replace";
 let response1Json = "replace"; 
 
 //runs 7th
-function displayTimeResults(response5Json, response2Json, countryCapital){
+function displayTimeResults(response5Json){//, response2Json, countryCapital){
   console.log(response5Json);
-  console.log(response2Json);
-  console.log(response1Json);
+  // console.log(response2Json);
+  // console.log(response1Json);
   let actualTime = response5Json.datetime;
   let actualTimeString = actualTime.toString();
   let actualTimeShort = actualTimeString.substring(11,16);
   console.log(actualTimeShort);
 $('#timeresults').empty();
 $('#timeresults').append(
-    `<p>It's actually ${actualTimeShort} in ${countryCapital}. Maybe you need 
-        ${response2Json.data.translations[1].translatedText} (Good afternoon!) or 
-        ${response2Json.data.translations[2].translatedText} (Good evening!) ?</p>`
+    `<p>It's actually ${actualTimeShort}</p>` 
+    // in` ${countryCapital}. Maybe you need 
+    //     ${response2Json.data.translations[1].translatedText} (Good afternoon!) or 
+    //     ${response2Json.data.translations[2].translatedText} (Good evening!) ?</p>`
   );
 $('#timeresults').removeClass('hidden');
-
 }
+
 
 //runs 6th
 function timeZone2(response4Json){
   console.log(response4Json);
+  return new Promise(()=>{
   let timeZone = response4Json.timeZoneId;
   console.log(timeZone);
   fetch("https://worldtimeapi.org/api/timezone/"+timeZone)
@@ -38,22 +40,25 @@ function timeZone2(response4Json){
     }
     throw new Error(res5.statusText);
   })
-  .then(response5Json => {console.log(response5Json)})
+  .then(response5Json => {console.log(response5Json);
+    displayTimeResults(response5Json)})//, response2Json, countryCapital)})
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
-  console.log(response5Json);
+  console.log(response5Json);})
 }
+
 
 //runs 5th
 function timeZone1(response3Json){
   console.log(response3Json);
+
+  return new Promise(() =>{
   let lat=response3Json.results[0].geometry.location.lat;
   let long=response3Json.results[0].geometry.location.lng;
   const timeStamp = Date.now();
   const timeStampString = timeStamp.toString();
   let timeStampShort= timeStampString.substring(0, (timeStampString.length)-3);
-  console.log(timeStampShort);
   fetch("https://maps.googleapis.com/maps/api/timezone/json?location="+lat+","+long+"&timestamp="+timeStampShort+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
   .then(res4 => {
     if (res4.ok) {
@@ -61,10 +66,10 @@ function timeZone1(response3Json){
     }
     throw new Error(res4.statusText);
   })
-  .then(response4Json => console.log(response4Json))
+  .then(response4Json => timeZone2(response4Json))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
-  });
+  })})
 }
 
 //runs fourth
@@ -79,11 +84,8 @@ function geoCoding(response1Json){
    }
    throw new Error(res3.statusText);
  })
- .then(response3Json => {
-  console.log(response3Json)  
+ .then(response3Json => {console.log(response3Json);
   timeZone1(response3Json)})
- .then(response4Json => timeZone2(response4Json))
- .then(response5Json => displayTimeZone(response5Json, response2Json, countryCapital)) 
  .catch(err => {
    $('#js-error-message').text(`Something went wrong: ${err.message}`);
  })
@@ -131,10 +133,10 @@ function googleTranslate(response1Json) {
     throw new Error(res2.statusText);
   })
   .then(response2Json => displayTranslationResults(response2Json))
-  .then(geoCoding(response1Json))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
+  geoCoding(response1Json);
 }
 
 debugger
@@ -162,7 +164,6 @@ debugger
       throw new Error(res1.statusText);
     })
     .then(response1Json => googleTranslate(response1Json))
-    .then(response2Json => displayTranslationResults(response2Json))
     .catch(err => {
       $('#js-error-message').text(`Something went wrong: ${err.message}`);
     });
