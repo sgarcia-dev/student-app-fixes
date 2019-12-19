@@ -1,13 +1,3 @@
-'use strict';
-
-let countryCapital = "replace";
-let response5Json = "replace";
-let response4Json = "replace";
-let response3Json = "replace";
-let response2Json = "replace";
-let response1Json = "replace"; 
-
-//runs 7th
 function displayTimeResults(response5Json){//, response2Json, countryCapital){
   console.log(response5Json);
   // console.log(response2Json);
@@ -40,12 +30,11 @@ function timeZone2(response4Json){
     }
     throw new Error(res5.statusText);
   })
-  .then(response5Json => {console.log(response5Json);
-    displayTimeResults(response5Json)})//, response2Json, countryCapital)})
+  .then(response5Json => console.log(response5Json))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   });
-})
+  console.log(response5Json);})
 }
 
 
@@ -66,7 +55,7 @@ function timeZone1(response3Json){
     }
     throw new Error(res4.statusText);
   })
-  .then(response4Json => timeZone2(response4Json))
+  .then(response4Json => console.log(response4Json))
   .catch(err => {
     $('#js-error-message').text(`Something went wrong: ${err.message}`);
   })})
@@ -86,6 +75,8 @@ function geoCoding(response1Json){
  })
  .then(response3Json => {console.log(response3Json);
   timeZone1(response3Json)})
+ .then(response4Json => timeZone2(response4Json))
+ .then(response5Json => displayTimeResults(response5Json))
  .catch(err => {
    $('#js-error-message').text(`Something went wrong: ${err.message}`);
  })
