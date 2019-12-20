@@ -11,11 +11,11 @@ function watchForm(){
 $(watchForm);
 
 //runs 7th
-var displayTimeResults = ((response5Json,countryCapital,response2Json) => {
-  console.log(response5Json);
+var displayTimeResults = ((longFormTime,countryCapital,translationResults) => {
+  console.log(longFormTime);
   console.log(countryCapital);
-  console.log(response2Json);
-  let actualTime = response5Json.datetime;
+  console.log(translationResults);
+  let actualTime = longFormTime.datetime;
   let actualTimeString = actualTime.toString();
   let actualTimeShort = actualTimeString.substring(11,16);
   console.log(actualTimeShort);
@@ -23,55 +23,54 @@ $('#timeresults').empty();
 $('#timeresults').append(
     `<p>It's actually ${actualTimeShort}in
          ${countryCapital}. Maybe you need 
-         ${response2Json.data.translations[1].translatedText} (Good afternoon!) or 
-         ${response2Json.data.translations[2].translatedText} (Good evening!) ?</p>`
+         ${translationResults.data.translations[1].translatedText} (Good afternoon!) or 
+         ${translationResults.data.translations[2].translatedText} (Good evening!) ?</p>`
   );
 $('#timeresults').removeClass('hidden');
 })
 
 //runs 6th
-var timeZone2 = (response4Json => {
-  console.log(response4Json);
-  let timeZone = response4Json.timeZoneId;
+var timeZone2 = (timeZoneName) => {
+  console.log(timeZoneName);
+  let timeZone = timeZoneName.timeZoneId;
   console.log(timeZone);
   request("https://worldtimeapi.org/api/timezone/"+timeZone)
-})
+}
 
 //runs 5th
-var timeZone1 = (response3Json => {
-  console.log(response3Json);
-  let lat=response3Json.results[0].geometry.location.lat;
-  let long=response3Json.results[0].geometry.location.lng;
+var timeZone1 = (geoCode => {
+  console.log(geoCode)
+  let lat=geoCode.results[0].geometry.location.lat;
+  let long=geoCode.results[0].geometry.location.lng;
   const timeStamp = Date.now();
   const timeStampString = timeStamp.toString();
   let timeStampShort= timeStampString.substring(0, (timeStampString.length)-3);
   request("https://maps.googleapis.com/maps/api/timezone/json?location="+lat+","+long+"&timestamp="+timeStampShort+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
-  })
-
-
+})
 
 //runs fourth
 var geoCoding = (translateData =>{
   let countryCapital=translateData[0].capital;
   let countryCode=translateData[0].alpha2Code;
+  let options = [];
 
-  request("https://maps.googleapis.com/maps/api/geocode/json?address="+countryCapital+"&components=country:"+countryCode+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
+  request("https://maps.googleapis.com/maps/api/geocode/json?address="+countryCapital+"&components=country:"+countryCode+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks", options)
 })
 
 //runs third, works
-function displayTranslationResults(response2Json)
-{ console.log(response2Json);
+function displayTranslationResults(translationResults)
+{ console.log(translationResults);
   
   const name = $('#js-name').val();
 
 $('#results').empty();
 $('#results').append(
-    `<p>${response2Json.data.translations[0].translatedText} ${name}!!!!!</p>`
+    `<p>${translationResults.data.translations[0].translatedText} ${name}!!!!!</p>`
   );
 $('#results').removeClass('hidden');
 }
 
-//runs second, triggers displayTranslationResults() and geoCoding() (also takes response1Json as parameter)
+//runs second, triggers displayTranslationResults() and geoCoding() 
 function googleTranslate(translateData) {
    console.log(translateData);
 
@@ -93,7 +92,7 @@ function googleTranslate(translateData) {
    } 
      
  request("https://translation.googleapis.com/language/translate/v2?key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks", options1)
-  .then(response2Json => displayTranslationResults(response2Json))
+  .then(translationResults => displayTranslationResults(translationResults))
 }
 
 debugger
@@ -116,11 +115,12 @@ debugger
   request(url, options).then((translateData) => {
     googleTranslate(translateData);
     geoCoding(translateData)
-      .then(timeZone1())
-      .then(timeZone2())
-      .then(displayTimeResults());
+      .then(timeZone1(geoCode))
+      .then(timeZone2(timeZoneName))
+      .then(displayTimeResults(longFormTime,countryCapital,translationResults))
   })
 }
+
 
 function request(url, options) {
   return fetch(url, options)
