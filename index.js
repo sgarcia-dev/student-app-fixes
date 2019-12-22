@@ -10,6 +10,10 @@ function watchForm(){
 
 $(watchForm);
 
+// Render Functions
+
+// API Call Functions
+
 //runs 7th
 var displayTimeResults = ((longFormTime,countryCapital,translationResults) => {
   console.log(longFormTime);
@@ -34,40 +38,40 @@ var timeZone2 = (timeZoneName) => {
   console.log(timeZoneName);
   let timeZone = timeZoneName.timeZoneId;
   console.log(timeZone);
-  request("https://worldtimeapi.org/api/timezone/"+timeZone)
+  return request("https://worldtimeapi.org/api/timezone/"+timeZone)
 }
 
 //runs 5th
-var timeZone1 = (geoCode => {
+var timeZone1 = geoCode => {
   console.log(geoCode)
   let lat=geoCode.results[0].geometry.location.lat;
   let long=geoCode.results[0].geometry.location.lng;
   const timeStamp = Date.now();
   const timeStampString = timeStamp.toString();
   let timeStampShort= timeStampString.substring(0, (timeStampString.length)-3);
-  request("https://maps.googleapis.com/maps/api/timezone/json?location="+lat+","+long+"&timestamp="+timeStampShort+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
-})
+  return request("https://maps.googleapis.com/maps/api/timezone/json?location="+lat+","+long+"&timestamp="+timeStampShort+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks")
+}
 
 //runs fourth
-var geoCoding = (translateData =>{
+var geoCoding = translateData => {
   let countryCapital=translateData[0].capital;
   let countryCode=translateData[0].alpha2Code;
   let options = [];
 
-  request("https://maps.googleapis.com/maps/api/geocode/json?address="+countryCapital+"&components=country:"+countryCode+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks", options)
-})
+  return request("https://maps.googleapis.com/maps/api/geocode/json?address="+countryCapital+"&components=country:"+countryCode+"&key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks", options)
+}
 
 //runs third, works
-function displayTranslationResults(translationResults)
-{ console.log(translationResults);
-  
-  const name = $('#js-name').val();
+function displayTranslationResults(translationResults) {
+  console.log(translationResults);
 
-$('#results').empty();
-$('#results').append(
+  const name = $("#js-name").val();
+
+  $("#results").empty();
+  $("#results").append(
     `<p>${translationResults.data.translations[0].translatedText} ${name}!!!!!</p>`
   );
-$('#results').removeClass('hidden');
+  $("#results").removeClass("hidden");
 }
 
 //runs second, triggers displayTranslationResults() and geoCoding() 
@@ -91,11 +95,12 @@ function googleTranslate(translateData) {
     body: JSON.stringify(data1)
    } 
      
- request("https://translation.googleapis.com/language/translate/v2?key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks", options1)
-  .then(translationResults => displayTranslationResults(translationResults))
+  return request("https://translation.googleapis.com/language/translate/v2?key=AIzaSyDumOtzsZBkWdtNzTDcdsVLKYJ6yJUtkks", options1)
+    .then(translationResults => {
+      displayTranslationResults(translationResults);
+      return translationResults;    
+    });
 }
-
-debugger
 
 //runs first, sends data to googleTranslate and geoCoding
 function getCountryFromApi(country) {
@@ -110,14 +115,31 @@ console.log(url);
 	  "x-rapidapi-key": "ebaaafd4d3msh752c26791113a7fp144b54jsn7740997f5edd"
   })}
 
-debugger
+  request(url, options).then((countryData) => {
+    let translateRes, geoCodeRes, timeZone1Res, timeZone2Res;
 
-  request(url, options).then((translateData) => {
-    googleTranslate(translateData);
-    geoCoding(translateData)
-      .then(timeZone1(geoCode))
-      .then(timeZone2(timeZoneName))
-      .then(displayTimeResults(longFormTime,countryCapital,translationResults))
+    const googleTranslatePromise = googleTranslate(countryData)
+      .then(res => {
+        translateRes = res;
+      });
+    const geoCodingPromise = geoCoding(countryData)
+      .then(res => {
+        geoCodeRes = res;
+        return timeZone1(geoCodeRes);
+      })
+      .then(res => {
+        timeZone1Res = res;
+        return timeZone2(timeZone1Res);
+      })
+      .then(res => {
+        timeZone2Res = res;
+      })
+    
+    Promise.all([googleTranslatePromise, geoCodingPromise])
+      .then(() => {
+        let countryCapital = countryData[0].capital;
+        displayTimeResults(timeZone2Res,countryCapital,translateRes)
+      });
   })
 }
 
